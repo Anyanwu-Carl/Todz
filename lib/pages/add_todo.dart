@@ -26,7 +26,7 @@ class AddTodo extends ConsumerWidget {
                 controller: todoController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.all(25),
+                  contentPadding: EdgeInsets.symmetric(vertical: 15),
                 ),
               ),
             ),
