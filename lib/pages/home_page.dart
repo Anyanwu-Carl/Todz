@@ -65,12 +65,14 @@ class HomePage extends ConsumerWidget {
             }
           } else {
             return Slidable(
+              key: ValueKey(todos[index].todoId.toString()),
               // Start slidable button
               startActionPane: ActionPane(
                 motion: ScrollMotion(),
                 children: [
                   // Delete button
                   SlidableAction(
+                    key: ValueKey("${todos[index].todoId.toString()}delete"),
                     onPressed: (context) => ref
                         .watch(todoProvider.notifier)
                         .deleteTodo(activeTodos[index].todoId),

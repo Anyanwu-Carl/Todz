@@ -6,25 +6,69 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:todo/main.dart';
+import 'package:todo/model/todo_model.dart';
+import 'package:todo/pages/completed_todo.dart';
+import 'package:todo/pages/home_page.dart';
+import 'package:todo/provider/todo_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  // Initial app state
+  testWidgets("default state", (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: MyApp()));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    Finder defaultText = find.text("Add a todo with the button below");
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    expect(defaultText, findsOneWidget);
+  });
+
+  // Completed todo
+  testWidgets("completed todos show up on completed page", (tester) async {
+    TodoListNotifier notifier = TodoListNotifier(<Todo>[
+      Todo(todoId: 0, content: "Write code", completed: true),
+    ]);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [todoProvider.overrideWith((ref) => notifier)],
+        child: const MaterialApp(home: CompletedTodo()),
+      ),
+    );
+    Finder completedText = find.text("Write code");
+
+    expect(completedText, findsOneWidget);
+  });
+
+  // Slide and delete todo
+  testWidgets("slide and delete a todo", (tester) async {
+    TodoListNotifier notifier = TodoListNotifier(<Todo>[
+      Todo(todoId: 0, content: "Write code", completed: false),
+    ]);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [todoProvider.overrideWith((ref) => notifier)],
+        child: const MaterialApp(home: HomePage()),
+      ),
+    );
+    Finder completedText = find.text("Write code");
+
+    expect(completedText, findsOneWidget);
+
+    Finder draggableWidget = find.byKey(const ValueKey("0"));
+    Finder deleteButton = find.byKey(const ValueKey("0delete"));
+    await tester.timedDrag(
+      draggableWidget,
+      const Offset(200, 0),
+      const Duration(seconds: 1),
+    );
+    await tester.pump();
+    await tester.tap(deleteButton);
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    Finder defaultText = find.text("Add a todo with the button below");
+
+    expect(defaultText, findsOneWidget);
   });
 }
